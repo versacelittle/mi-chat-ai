@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>ReChat AI | Versión Infinita</title>
+    <style>
+        :root { --insta: linear-gradient(45deg, #f09433, #e95950, #bc1888); }
+        body { margin: 0; background: #000; font-family: sans-serif; color: white; overflow: hidden; }
+        
+        /* Pantalla de Inicio */
+        #hero { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: #000; }
+        .btn-insta { background: var(--insta); color: white; border: none; padding: 20px 40px; border-radius: 50px; cursor: pointer; font-size: 18px; font-weight: bold; }
+
+        /* Interfaz Blanca */
+        #app { display: none; height: 100vh; flex-direction: column; background: #fff; color: #000; }
+        header { padding: 10px; border-bottom: 1px solid #ddd; background: #fff; display: flex; gap: 10px; z-index: 10; }
+        
+        /* El "Truco": Un contenedor que no se traba */
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; background: #f4f4f4; display: flex; flex-direction: column; }
+        .bubble { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 14px; margin-bottom: 8px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .basti { align-self: flex-start; background: #fff; border-left: 5px solid #bc1888; }
+        .versaires { align-self: flex-end; background: var(--insta); color: white; }
+        
+        .load-more { text-align: center; padding: 20px; }
+        .btn-more { background: #eee; border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div id="hero">
+        <h1 style="font-size: 3rem; margin-bottom: 10px;">ReChat AI</h1>
+        <p style="color: #888; margin-bottom: 30px;">Carga completa de 54,000 mensajes sin trabar tu PC</p>
+        <button class="btn-insta" onclick="document.getElementById('f').click()">ABRIR CONVERSACIÓN COMPLETA</button>
+        <input type="file" id="f" style="display:none" onchange="cargarTodo(this)">
+    </div>
+
+    <div id="app">
+        <header>
+            <input type="text" id="buscador" placeholder="Buscar en toda la historia..." style="flex:1; padding:12px; border-radius:10px; border:1px solid #ccc;">
+            <button onclick="buscar()" style="background:#000; color:#fff; border:none; border-radius:10px; padding:0 20px; cursor:pointer;">BUSCAR</button>
+        </header>
+
+        <div id="chat-container">
+            <div id="buffer-top" class="load-more">
+                <button class="btn-more" onclick="cargarAnteriores()">↑ Cargar mensajes más antiguos</button>
+            </div>
+            <div id="mensajes-render"></div>
+        </div>
+
+        <footer style="padding:15px; border-top:1px solid #eee; text-align:center;">
+            <small id="info-count" style="color:#888"></small>
+        </footer>
+    </div>
+
+<script>
+    let todosLosMensajes = [];
+    let indiceActual = 0;
+    const CANTIDAD_POR_PAGINA = 50;
+
+    function cargarTodo(input) {
+        const reader = new FileReader();
+        document.querySelector('#hero p').innerText = "Analizando mensajes... un segundo.";
+        
+        reader.onload = function(e) {
+            try {
+                todosLosMensajes = JSON.parse(e.target.result);
+                document.getElementById('hero').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+                
+                document.getElementById('info-count').innerText = "Total: " + todosLosMensajes.length.toLocaleString() + " mensajes cargados.";
+                
+                // Empezamos desde el final
+                indiceActual = todosLosMensajes.length - CANTIDAD_POR_PAGINA;
+                renderizar(todosLosMensajes.slice(indiceActual));
+            } catch (err) {
+                alert("Error al procesar el JSON. Asegúrate de que el formato sea correcto.");
+            }
+        };
+        reader.readAsText(input.files[0]);
+    }
+
+    function renderizar(lista, appendTop = false) {
+        const caja = document.getElementById('mensajes-render');
+        const html = lista.map(m => {
+            const esBasti = m.sender_name.toLowerCase().includes('basti');
+            return <div class="bubble ${esBasti ? 'basti' : 'versaires'}"><b>${m.sender_name}</b><br>${m.content}</div>;
+        }).join('');
+
+        if (appendTop) {
+            caja.insertAdjacentHTML('afterbegin', html);
+        } else {
+            caja.innerHTML = html;
+            const container = document.getElementById('chat-container');
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function cargarAnteriores() {
+        if (indiceActual <= 0) {
+            alert("Has llegado al principio de la conversación.");
+            return;
+        }
+        let nuevoIndice = Math.max(0, indiceActual - CANTIDAD_POR_PAGINA);
+        const bloque = todosLosMensajes.slice(nuevoIndice, indiceActual);
+        indiceActual = nuevoIndice;
+        renderizar(bloque, true);
+    }
+
+    function buscar() {
+        const q = document.getElementById('buscador').value.toLowerCase();
+        if (!q) return alert("Escribe algo para buscar");
+        
+        const resultados = todosLosMensajes.filter(m => m.content.toLowerCase().includes(q));
+        renderizar(resultados.slice(-100)); // Mostramos los últimos 100 resultados de esa búsqueda
+        document.getElementById('buffer-top').style.display = 'none'; // Ocultamos el cargar más en búsqueda
+    }
+</script>
+</body>
+</html>
