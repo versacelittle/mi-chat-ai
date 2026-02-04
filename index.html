@@ -4,52 +4,46 @@
     <meta charset="UTF-8">
     <title>ReChat AI | Basti & Versaires</title>
     <style>
-        body { margin: 0; background: #000; font-family: sans-serif; color: white; overflow: hidden; }
-        #app { height: 100vh; display: flex; flex-direction: column; background: #fff; color: #000; }
-        header { padding: 15px; border-bottom: 1px solid #ddd; background: #fff; text-align: center; font-weight: bold; }
-        #chat { flex: 1; overflow-y: auto; padding: 20px; background: #f4f4f4; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 14px; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; }
+        #app { height: 100vh; display: flex; flex-direction: column; background: #f0f2f5; color: #000; }
+        header { padding: 15px; background: #fff; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; }
+        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .basti { align-self: flex-start; background: #fff; border-left: 5px solid #bc1888; }
         .versaires { align-self: flex-end; background: linear-gradient(45deg, #f09433, #bc1888); color: white; }
-        #loader { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 100; }
+        #loading { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 100; }
     </style>
 </head>
 <body>
-
-    <div id="loader"><h1>Cargando 54,000 mensajes...</h1></div>
-
+    <div id="loading"><h1>Conectando con chat_real.json...</h1></div>
     <div id="app">
-        <header>Chat Basti & Versaires</header>
+        <header>Conversación Basti & Versaires</header>
         <div id="chat"></div>
     </div>
 
 <script>
     window.onload = async function() {
-        const chat = document.getElementById('chat');
-        const loader = document.getElementById('loader');
-        
         try {
-            // Buscamos el archivo directamente en tu GitHub
-            const respuesta = await fetch('chat_real.json');
-            const datos = await respuesta.json();
+            const res = await fetch('chat_real.json');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const msgs = data.messages || data;
             
-            // Si Instagram guardó los mensajes en una lista llamada 'messages'
-            const mensajes = datos.messages || datos;
+            // Mostramos los últimos 200 para que cargue rápido
+            const ultimos = msgs.slice(-200);
             
-            // Solo dibujamos los últimos 100 para que tu Opera GX no sufra
-            const ultimos = mensajes.slice(-100);
-            
-            chat.innerHTML = ultimos.map(m => {
+            document.getElementById('chat').innerHTML = ultimos.map(m => {
                 const esBasti = m.sender_name.toLowerCase().includes('basti');
                 return <div class="bubble ${esBasti ? 'basti' : 'versaires'}"><b>${m.sender_name}</b><br>${m.content || "[Multimedia]"}</div>;
             }).join('');
             
-            loader.style.display = 'none';
-            chat.scrollTop = chat.scrollHeight;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
         } catch (e) {
-            loader.innerHTML = "<h1>Error: No se encontró 'chat_real.json'</h1>";
+            document.getElementById('loading').innerHTML = "<h1 style='color:red;'>Error: No se encontró el archivo chat_real.json o el limitador de RAM de Opera lo bloqueó.</h1>";
         }
     };
 </script>
 </body>
 </html>
+
