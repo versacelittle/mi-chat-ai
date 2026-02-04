@@ -2,63 +2,55 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Ultra Veloz</title>
+    <title>ReChat AI | Éxito</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; margin: 0; }
-        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; display: inline-block; }
-        .btn { background: #bc1888; color: white; padding: 20px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-size: 18px; margin-top: 20px; }
-        #chat { display: none; background: #fff; color: #000; text-align: left; padding: 20px; height: 100vh; overflow-y: auto; position: fixed; inset: 0; z-index: 999; }
-        .msg { border-bottom: 1px solid #eee; padding: 12px; font-size: 14px; }
+        body { background: #000; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .btn { background: #bc1888; color: white; padding: 20px 40px; border-radius: 50px; border: none; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 20px; }
+        #chat { display: none; background: #fff; color: #000; text-align: left; padding: 20px; position: fixed; inset: 0; overflow-y: auto; z-index: 1000; }
+        .msg { border-bottom: 1px solid #eee; padding: 15px; }
+        .name { color: #bc1888; font-weight: bold; }
     </style>
 </head>
 <body>
+    <h1>¡Archivo Confirmado!</h1>
+    <p>Selecciona el archivo <b>chat_fin</b> o <b>chat_real.json</b> para ver los mensajes.</p>
+    <input type="file" id="f" style="display:none">
+    <button class="btn" onclick="document.getElementById('f').click()">VER MIS MENSAJES</button>
 
-    <div id="setup" class="card">
-        <h1>ReChat AI</h1>
-        <p>Carga de alta velocidad para archivos gigantes.</p>
-        <input type="file" id="f" style="display:none" accept=".json">
-        <button class="btn" onclick="document.getElementById('f').click()">CARGAR CHAT_REAL.JSON</button>
-        <p id="st" style="margin-top:15px; color:#888;"></p>
+    <div id="chat">
+        <button onclick="location.reload()" style="position:fixed; top:10px; right:10px; padding:10px;">Cerrar</button>
+        <div id="lista"></div>
     </div>
-
-    <div id="chat"></div>
 
 <script>
     document.getElementById('f').onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        document.getElementById('st').innerText = "Procesando... espera 10 segundos.";
         const reader = new FileReader();
-        
         reader.onload = function(ev) {
             try {
-                const raw = ev.target.result;
-                const j = JSON.parse(raw);
-                const m = j.messages || j;
+                const data = JSON.parse(ev.target.result);
+                const msgs = data.messages || data;
                 
-                document.getElementById('setup').style.display = 'none';
-                const c = document.getElementById('chat');
-                c.style.display = 'block';
+                const lista = document.getElementById('lista');
+                document.getElementById('chat').style.display = 'block';
                 
-                // Cargamos solo los últimos 100 mensajes para que la PC no sufra
-                const ultimos = m.slice(-100);
-                
-                let html = <h2>Chat Cargado (${m.length} mensajes)</h2>;
-                ultimos.forEach(msg => {
-                    html += <div class="msg"><b>${msg.sender_name}:</b> ${msg.content || "[Multimedia]"}</div>;
-                });
-                
-                c.innerHTML = html;
+                // Mostramos los mensajes (el archivo tiene 5.3 millones de caracteres, así que cargamos los últimos 300)
+                lista.innerHTML = <h2>Total de mensajes: ${msgs.length}</h2> + 
+                    msgs.slice(-300).map(m => `
+                        <div class="msg">
+                            <span class="name">${m.sender_name}:</span><br>
+                            ${m.content || "[Multimedia]"}
+                        </div>
+                    `).join('');
             } catch (err) {
-                alert("El archivo es demasiado grande o no es un JSON válido.");
+                alert("Error al leer el archivo. Asegúrate de seleccionar el archivo que viste en el Bloc de Notas.");
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(e.target.files[0]);
     };
 </script>
 </body>
 </html>
+
 
 
 
