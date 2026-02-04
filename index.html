@@ -2,49 +2,55 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Basti & Versaires</title>
+    <title>ReChat AI | Carga Manual</title>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; }
-        #app { height: 100vh; display: flex; flex-direction: column; background: #f0f2f5; color: #000; }
-        header { padding: 15px; background: #fff; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; }
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .basti { align-self: flex-start; background: #fff; border-left: 5px solid #bc1888; }
-        .versaires { align-self: flex-end; background: linear-gradient(45deg, #f09433, #bc1888); color: white; }
-        #loading { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 100; }
+        body { background: #000; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        #chat { display: none; background: white; color: black; width: 100%; height: 100vh; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .msg { margin-bottom: 10px; padding: 10px; border-radius: 10px; background: #f0f0f0; }
     </style>
 </head>
 <body>
-    <div id="loading"><h1>Conectando con chat_real.json...</h1></div>
-    <div id="app">
-        <header>Conversación Basti & Versaires</header>
-        <div id="chat"></div>
+
+    <div id="setup" class="card">
+        <h1>ReChat AI</h1>
+        <p>El archivo es muy grande para carga automática.</p>
+        <p style="color: #888;">Presiona el botón y selecciona <b>chat_real.json</b></p>
+        <input type="file" id="fileInput" style="display:none" accept=".json">
+        <button class="btn" onclick="document.getElementById('fileInput').click()">SELECCIONAR ARCHIVO JSON</button>
     </div>
 
+    <div id="chat"></div>
+
 <script>
-    window.onload = async function() {
-        try {
-            const res = await fetch('chat_real.json');
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            const msgs = data.messages || data;
-            
-            // Mostramos los últimos 200 para que cargue rápido
-            const ultimos = msgs.slice(-200);
-            
-            document.getElementById('chat').innerHTML = ultimos.map(m => {
-                const esBasti = m.sender_name.toLowerCase().includes('basti');
-                return <div class="bubble ${esBasti ? 'basti' : 'versaires'}"><b>${m.sender_name}</b><br>${m.content || "[Multimedia]"}</div>;
-            }).join('');
-            
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-        } catch (e) {
-            document.getElementById('loading').innerHTML = "<h1 style='color:red;'>Error: No se encontró el archivo chat_real.json o el limitador de RAM de Opera lo bloqueó.</h1>";
-        }
+    document.getElementById('fileInput').onchange = function(e) {
+        const reader = new FileReader();
+        const setup = document.getElementById('setup');
+        const chat = document.getElementById('chat');
+
+        reader.onload = function(event) {
+            try {
+                const data = JSON.parse(event.target.result);
+                const msgs = data.messages || data;
+                
+                setup.style.display = 'none';
+                chat.style.display = 'block';
+
+                chat.innerHTML = <h2>Total: ${msgs.length} mensajes</h2> + msgs.slice(-300).map(m => `
+                    <div class="msg">
+                        <b>${m.sender_name}:</b> ${m.content || "[Multimedia]"}
+                    </div>
+                `).join('');
+            } catch (err) {
+                alert("Error: El archivo no es un JSON válido o es demasiado grande.");
+            }
+        };
+        reader.readAsText(e.target.files[0]);
     };
 </script>
 </body>
 </html>
+
 
 
