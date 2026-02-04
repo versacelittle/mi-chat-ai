@@ -2,46 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Final</title>
+    <title>ReChat AI | Ultra Veloz</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .btn { background: #bc1888; color: white; padding: 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
-        #chat { display: none; background: #fff; color: #000; text-align: left; padding: 20px; height: 100vh; overflow-y: auto; position: fixed; inset: 0; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; margin: 0; }
+        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; display: inline-block; }
+        .btn { background: #bc1888; color: white; padding: 20px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-size: 18px; margin-top: 20px; }
+        #chat { display: none; background: #fff; color: #000; text-align: left; padding: 20px; height: 100vh; overflow-y: auto; position: fixed; inset: 0; z-index: 999; }
+        .msg { border-bottom: 1px solid #eee; padding: 12px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div id="setup">
+    <div id="setup" class="card">
         <h1>ReChat AI</h1>
-        <p>Selecciona el archivo y espera 10 segundos sin tocar nada.</p>
+        <p>Carga de alta velocidad para archivos gigantes.</p>
         <input type="file" id="f" style="display:none" accept=".json">
         <button class="btn" onclick="document.getElementById('f').click()">CARGAR CHAT_REAL.JSON</button>
+        <p id="st" style="margin-top:15px; color:#888;"></p>
     </div>
 
     <div id="chat"></div>
 
 <script>
     document.getElementById('f').onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        document.getElementById('st').innerText = "Procesando... espera 10 segundos.";
         const reader = new FileReader();
+        
         reader.onload = function(ev) {
             try {
-                const j = JSON.parse(ev.target.result);
+                const raw = ev.target.result;
+                const j = JSON.parse(raw);
                 const m = j.messages || j;
+                
                 document.getElementById('setup').style.display = 'none';
                 const c = document.getElementById('chat');
                 c.style.display = 'block';
                 
-                // Cargamos solo los últimos 50 mensajes para probar
-                c.innerHTML = m.slice(-50).map(msg => `
-                    <div style="border-bottom:1px solid #eee; padding:10px;">
-                        <b>${msg.sender_name}:</b> ${msg.content || "[Imagen/Video]"}
-                    </div>
-                `).join('');
+                // Cargamos solo los últimos 100 mensajes para que la PC no sufra
+                const ultimos = m.slice(-100);
+                
+                let html = <h2>Chat Cargado (${m.length} mensajes)</h2>;
+                ultimos.forEach(msg => {
+                    html += <div class="msg"><b>${msg.sender_name}:</b> ${msg.content || "[Multimedia]"}</div>;
+                });
+                
+                c.innerHTML = html;
             } catch (err) {
-                alert("Error: El archivo no es válido.");
+                alert("El archivo es demasiado grande o no es un JSON válido.");
             }
         };
-        reader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
     };
 </script>
 </body>
