@@ -2,65 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Turbo</title>
+    <title>ReChat AI | Final</title>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; }
-        #chat { display: none; background: #f0f2f5; color: black; width: 100%; height: 100vh; overflow-y: auto; padding: 20px; box-sizing: border-box; position: absolute; top: 0; }
-        .msg { margin-bottom: 10px; padding: 12px; border-radius: 15px; background: white; border-left: 5px solid #bc1888; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .btn { background: #bc1888; color: white; padding: 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        #chat { display: none; background: #fff; color: #000; text-align: left; padding: 20px; height: 100vh; overflow-y: auto; position: fixed; inset: 0; }
     </style>
 </head>
 <body>
 
-    <div id="setup" class="card">
+    <div id="setup">
         <h1>ReChat AI</h1>
-        <p id="status">Archivo listo para procesar.</p>
-        <input type="file" id="fileInput" style="display:none" accept=".json">
-        <button class="btn" onclick="document.getElementById('fileInput').click()">SELECCIONAR CHAT_REAL.JSON</button>
+        <p>Selecciona el archivo y espera 10 segundos sin tocar nada.</p>
+        <input type="file" id="f" style="display:none" accept=".json">
+        <button class="btn" onclick="document.getElementById('f').click()">CARGAR CHAT_REAL.JSON</button>
     </div>
 
     <div id="chat"></div>
 
 <script>
-    document.getElementById('fileInput').onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        document.getElementById('status').innerText = "Procesando mensajes... espera 5 segundos.";
+    document.getElementById('f').onchange = function(e) {
         const reader = new FileReader();
-
-        reader.onload = function(event) {
+        reader.onload = function(ev) {
             try {
-                const data = JSON.parse(event.target.result);
-                const msgs = data.messages || data;
-                
+                const j = JSON.parse(ev.target.result);
+                const m = j.messages || j;
                 document.getElementById('setup').style.display = 'none';
-                const chatDiv = document.getElementById('chat');
-                chatDiv.style.display = 'block';
-
-                // SOLO CARGAMOS LOS ÚLTIMOS 100 PARA QUE NO SE TRABE
-                const ultimos = msgs.slice(-100);
+                const c = document.getElementById('chat');
+                c.style.display = 'block';
                 
-                chatDiv.innerHTML = <h2 style="text-align:center">Últimos mensajes (de ${msgs.length})</h2> + 
-                    ultimos.map(m => `
-                        <div class="msg">
-                            <b style="color:#bc1888">${m.sender_name}</b><br>
-                            ${m.content || "<span style='color:gray'>[Multimedia]</span>"}
-                        </div>
-                    `).join('');
-                
-                chatDiv.scrollTop = chatDiv.scrollHeight;
+                // Cargamos solo los últimos 50 mensajes para probar
+                c.innerHTML = m.slice(-50).map(msg => `
+                    <div style="border-bottom:1px solid #eee; padding:10px;">
+                        <b>${msg.sender_name}:</b> ${msg.content || "[Imagen/Video]"}
+                    </div>
+                `).join('');
             } catch (err) {
-                alert("Error: El archivo es demasiado grande o no es el JSON de Instagram.");
-                document.getElementById('status').innerText = "Error de formato.";
+                alert("Error: El archivo no es válido.");
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(e.target.files[0]);
     };
 </script>
 </body>
 </html>
+
 
 
 
