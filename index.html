@@ -1,57 +1,40 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ReChat AI | Final</title>
+    <title>ReChat AI | Fuerza Bruta</title>
     <style>
-        body { background: #0b0b0b; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .btn-rosa { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 18px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 18px; box-shadow: 0 4px 15px rgba(233, 89, 80, 0.3); }
-        #visor { display: none; margin-top: 30px; background: #1a1a1a; padding: 20px; border-radius: 15px; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto; border: 1px solid #333; }
-        .msg { border-bottom: 1px solid #222; padding: 10px; }
-        .user { color: #bc1888; font-weight: bold; font-size: 13px; }
-        pre { color: #0f0; background: #000; padding: 15px; overflow: auto; border-radius: 10px; font-size: 12px; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .btn-fuerza { background: #bc1888; color: white; padding: 20px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        #resultado { border: 1px solid #0f0; padding: 15px; white-space: pre-wrap; word-wrap: break-word; }
     </style>
 </head>
 <body>
-    <h1 style="margin-bottom:30px;">ReChat AI</h1>
+    <h1>MODO COMPATIBILIDAD TOTAL</h1>
+    <p>Si las letras verdes funcionaron antes, este botón también funcionará.</p>
     
-    <input type="file" id="archivo" style="display:none">
-    <button class="btn-rosa" onclick="document.getElementById('archivo').click()">SELECCIONAR CHAT</button>
+    <input type="file" id="input_file" style="display:none">
+    <button class="btn-fuerza" onclick="document.getElementById('input_file').click()">ABRIR ARCHIVO AHORA</button>
 
-    <div id="visor"></div>
+    <div id="resultado">Esperando archivo...</div>
 
-<script>
-    document.getElementById('archivo').onchange = function(e) {
-        const reader = new FileReader();
-        const visor = document.getElementById('visor');
-        
-        reader.onload = function(ev) {
-            visor.style.display = 'block';
-            const texto = ev.target.result;
-            
-            try {
-                // Intentamos cargarlo con burbujas de chat
-                const data = JSON.parse(texto);
-                const msgs = data.messages || data;
-                visor.innerHTML = <h2 style="color:#bc1888">Chat Cargado (${msgs.length} mensajes)</h2>;
-                
-                msgs.slice(-150).forEach(m => {
-                    visor.innerHTML += `
-                        <div class="msg">
-                            <div class="user">${m.sender_name}</div>
-                            <div style="margin-top:5px;">${m.content || "[Archivo o Audio]"}</div>
-                        </div>`;
-                });
-            } catch(err) {
-                // PLAN B: Si el JSON falla, mostramos el modo Matrix que sí te funcionó
-                visor.innerHTML = `
-                    <h2 style="color:#f00">Modo de Compatibilidad Activo</h2>
-                    <p>El archivo tiene un formato complejo, mostrándolo directamente:</p>
-                    <pre>${texto.substring(0, 10000)}</pre>`;
-            }
+    <script>
+        document.getElementById('input_file').onchange = function(e) {
+            const archivo = e.target.files[0];
+            const lector = new FileReader();
+            const caja = document.getElementById('resultado');
+
+            lector.onload = function(event) {
+                // Si llegamos aquí, el archivo se leyó
+                const contenido = event.target.result;
+                caja.innerText = "¡ARCHIVO LEÍDO CON ÉXITO!\n\n" + contenido.substring(0, 20000);
+            };
+
+            lector.onerror = function() {
+                alert("Error: El sistema bloqueó la lectura.");
+            };
+
+            lector.readAsText(archivo);
         };
-        reader.readAsText(e.target.files[0]);
-    };
-</script>
+    </script>
 </body>
 </html>
