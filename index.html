@@ -2,59 +2,48 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Mi Conversación</title>
+    <title>ReChat AI | Final</title>
     <style>
-        body { background: #0e0e0e; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 500px; width: 100%; }
-        .header { text-align: center; padding: 20px; background: linear-gradient(45deg, #f09433, #e95950, #bc1888, #4f5bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; font-weight: bold; }
-        .btn-cargar { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 15px rgba(188, 24, 136, 0.4); margin-bottom: 20px; }
-        #chat-area { display: none; width: 100%; background: #1a1a1a; border-radius: 20px; padding: 15px; box-sizing: border-box; border: 1px solid #333; }
-        .mensaje { margin-bottom: 15px; padding: 12px; border-radius: 15px; position: relative; line-height: 1.4; }
-        .basti { background: #333; border-bottom-left-radius: 2px; align-self: flex-start; border-left: 4px solid #4f5bd5; }
-        .versaires { background: #bc188822; border-bottom-right-radius: 2px; align-self: flex-end; border-right: 4px solid #bc1888; }
-        .nombre { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #aaa; text-transform: uppercase; }
-        .contenido { font-size: 15px; color: #eee; }
+        body { background: #0e0e0e; color: #fff; font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
+        .btn-rosa { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; max-width: 400px; margin-bottom: 20px; }
+        #chat-area { display: none; text-align: left; max-width: 600px; margin: 0 auto; background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #333; }
+        .msg { border-bottom: 1px solid #333; padding: 10px; margin-bottom: 5px; }
+        .user { color: #bc1888; font-weight: bold; }
     </style>
 </head>
 <body>
+    <h1 style="background: linear-gradient(45deg, #f09433, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ReChat AI</h1>
+    <input type="file" id="archivo" style="display:none">
+    <button class="btn-rosa" onclick="document.getElementById('archivo').click()">SELECCIONAR CHAT</button>
+    <div id="chat-area"></div>
 
-    <div class="container">
-        <div class="header">ReChat AI</div>
-        <p style="text-align:center; color:#888;">Visualizador de Mensajes Optimizado</p>
+<script>
+    document.getElementById('archivo').onchange = function(e) {
+        const reader = new FileReader();
+        const area = document.getElementById('chat-area');
         
-        <input type="file" id="archivo" style="display:none">
-        <button class="btn-cargar" onclick="document.getElementById('archivo').click()">SELECCIONAR CHAT_FINAL.JSON</button>
-
-        <div id="chat-area"></div>
-    </div>
-
-    <script>
-        document.getElementById('archivo').onchange = function(e) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                try {
-                    const data = JSON.parse(ev.target.result);
-                    const msgs = data.messages || data;
-                    const area = document.getElementById('chat-area');
-                    area.style.display = 'block';
-                    
-                    area.innerHTML = <div style="text-align:center; color:#555; margin-bottom:20px;">Mostrando últimos 300 mensajes de ${msgs.length}</div>;
-                    
-                    msgs.slice(-300).forEach(m => {
-                        const clase = m.sender_name.toLowerCase().includes('basti') ? 'basti' : 'versaires';
-                        area.innerHTML += `
-                            <div class="mensaje ${clase}">
-                                <div class="nombre">${m.sender_name}</div>
-                                <div class="contenido">${m.content || "<small style='color:#666'>[Multimedia / Audio]</small>"}</div>
-                            </div>
-                        `;
-                    });
-                } catch(err) {
-                    alert("Error al procesar el diseño. El archivo tiene un formato no compatible.");
-                }
-            };
-            reader.readAsText(e.target.files[0]);
+        reader.onload = function(ev) {
+            try {
+                // Forzamos la lectura incluso si el JSON tiene errores leves
+                const raw = ev.target.result;
+                const data = JSON.parse(raw);
+                const msgs = data.messages || data;
+                
+                area.style.display = 'block';
+                area.innerHTML = "<h3>Cargados " + msgs.length + " mensajes</h3>";
+                
+                msgs.slice(-200).forEach(m => {
+                    area.innerHTML += <div class="msg"><span class="user">${m.sender_name}:</span><br>${m.content || "[Multimedia]"}</div>;
+                });
+            } catch(err) {
+                // Si falla el diseño, mostramos el texto puro como antes para no perder nada
+                area.style.display = 'block';
+                area.innerHTML = "<h3>Error de diseño, mostrando texto puro:</h3><pre style='color:#0f0; white-space:pre-wrap;'>" + ev.target.result.substring(0, 5000) + "</pre>";
+            }
         };
-    </script>
+        reader.readAsText(e.target.files[0]);
+    };
+</script>
 </body>
 </html>
+
