@@ -2,57 +2,45 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat AI | Galería</title>
+    <title>ReChat AI | Final</title>
     <style>
-        body { background: #000; color: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { margin-bottom: 20px; background: linear-gradient(45deg, #f09433, #e95950, #bc1888, #4f5bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 35px; font-weight: bold; }
-        .btn-subir { background: #bc1888; color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 16px; margin-bottom: 30px; transition: 0.3s; }
-        .btn-subir:hover { transform: scale(1.05); background: #e95950; }
-        #chat-container { width: 100%; max-width: 500px; display: none; }
-        .mensaje { margin-bottom: 12px; padding: 12px 16px; border-radius: 20px; max-width: 80%; line-height: 1.4; position: relative; font-size: 15px; }
-        /* Mensajes de Basti */
-        .basti { background: #262626; align-self: flex-start; margin-right: auto; border-bottom-left-radius: 4px; border: 1px solid #333; }
-        /* Mensajes de Versaires */
-        .versaires { background: linear-gradient(45deg, #4f5bd5, #bc1888); align-self: flex-end; margin-left: auto; border-bottom-right-radius: 4px; }
-        .user-label { font-size: 11px; font-weight: bold; margin-bottom: 4px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
-        .content { word-wrap: break-word; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .btn-rosa { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; border: none; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        #contenedor { display: none; text-align: left; max-width: 600px; margin: 0 auto; background: #111; padding: 15px; border-radius: 15px; border: 1px solid #333; }
+        .bubble { margin-bottom: 10px; padding: 10px; border-radius: 10px; background: #222; border-left: 4px solid #bc1888; }
+        .user { font-size: 12px; color: #bc1888; font-weight: bold; }
+        pre { color: #0f0; background: #000; padding: 10px; overflow: auto; font-size: 12px; }
     </style>
 </head>
 <body>
-
-    <div class="header">ReChat AI</div>
-    
-    <input type="file" id="f" style="display:none">
-    <button class="btn-subir" onclick="document.getElementById('f').click()">SUBIR CHAT</button>
-
-    <div id="chat-container"></div>
+    <h1>ReChat AI</h1>
+    <input type="file" id="archivo" style="display:none">
+    <button class="btn-rosa" onclick="document.getElementById('archivo').click()">CARGAR CHAT</button>
+    <div id="contenedor"></div>
 
 <script>
-    document.getElementById('f').onchange = function(e) {
+    document.getElementById('archivo').onchange = function(e) {
         const reader = new FileReader();
+        const visor = document.getElementById('contenedor');
+        
         reader.onload = function(ev) {
+            visor.style.display = 'block';
+            const texto = ev.target.result;
             try {
-                const data = JSON.parse(ev.target.result);
+                const data = JSON.parse(texto);
                 const msgs = data.messages || data;
-                const container = document.getElementById('chat-container');
+                visor.innerHTML = <p style="text-align:center">${msgs.length} mensajes encontrados</p>;
                 
-                container.style.display = 'flex';
-                container.style.flexDirection = 'column';
-                container.innerHTML = <p style="text-align:center; color:#666;">${msgs.length} mensajes cargados</p>;
-                
-                // Cargamos los últimos 300 mensajes
-                msgs.slice(-300).forEach(m => {
-                    const isBasti = m.sender_name.toLowerCase().includes('basti');
-                    const clase = isBasti ? 'basti' : 'versaires';
-                    
-                    container.innerHTML += `
-                        <div class="mensaje ${clase}">
-                            <div class="user-label">${m.sender_name}</div>
-                            <div class="content">${m.content || "<i style='color:#888'>[Archivo multimedia]</i>"}</div>
+                msgs.slice(-200).forEach(m => {
+                    visor.innerHTML += `
+                        <div class="bubble">
+                            <div class="user">${m.sender_name}</div>
+                            <div>${m.content || "[Multimedia]"}</div>
                         </div>`;
                 });
             } catch(err) {
-                alert("Error al aplicar el diseño. Intenta subir el archivo de nuevo.");
+                // Si el diseño falla, volvemos a lo que funcionó en image_a52f25.jpg
+                visor.innerHTML = <h3>Modo de Emergencia Activo</h3><pre>${texto.substring(0, 5000)}</pre>;
             }
         };
         reader.readAsText(e.target.files[0]);
