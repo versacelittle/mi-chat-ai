@@ -1,40 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ReChat AI | Fuerza Bruta</title>
+    <title>ReChat AI</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-        .btn-fuerza { background: #bc1888; color: white; padding: 20px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
-        #resultado { border: 1px solid #0f0; padding: 15px; white-space: pre-wrap; word-wrap: break-word; }
+        body { background: #0e0e0e; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .btn { background: #bc1888; color: white; padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; }
+        #log { margin-top: 20px; background: #1a1a1a; padding: 15px; border-radius: 10px; text-align: left; display: none; border: 1px solid #333; }
     </style>
 </head>
 <body>
-    <h1>MODO COMPATIBILIDAD TOTAL</h1>
-    <p>Si las letras verdes funcionaron antes, este botón también funcionará.</p>
-    
-    <input type="file" id="input_file" style="display:none">
-    <button class="btn-fuerza" onclick="document.getElementById('input_file').click()">ABRIR ARCHIVO AHORA</button>
+    <h1>ReChat AI</h1>
+    <input type="file" id="f" style="display:none">
+    <button class="btn" onclick="document.getElementById('f').click()">SUBIR ARCHIVO</button>
+    <div id="log"></div>
 
-    <div id="resultado">Esperando archivo...</div>
-
-    <script>
-        document.getElementById('input_file').onchange = function(e) {
-            const archivo = e.target.files[0];
-            const lector = new FileReader();
-            const caja = document.getElementById('resultado');
-
-            lector.onload = function(event) {
-                // Si llegamos aquí, el archivo se leyó
-                const contenido = event.target.result;
-                caja.innerText = "¡ARCHIVO LEÍDO CON ÉXITO!\n\n" + contenido.substring(0, 20000);
-            };
-
-            lector.onerror = function() {
-                alert("Error: El sistema bloqueó la lectura.");
-            };
-
-            lector.readAsText(archivo);
+<script>
+    document.getElementById('f').onchange = function(e) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const log = document.getElementById('log');
+            log.style.display = "block";
+            // Esto es lo que vimos en la foto que sí funciona
+            log.innerHTML = "<h3>¡Lectura Exitosa!</h3><pre style='color:#0f0; white-space:pre-wrap;'>" + ev.target.result.substring(0, 5000) + "</pre>";
         };
-    </script>
+        reader.readAsText(e.target.files[0]);
+    };
+</script>
 </body>
 </html>
