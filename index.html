@@ -3,167 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReChat Universal App</title>
+    <title>ReChat App</title>
     <style>
         :root {
+            --accent: #bc1888;
             --gradient: linear-gradient(45deg, #f09433, #e95950, #bc1888);
-            --bg-dark: #121213;
-            --bubble-left: #262626;
+            --bg-white: #ffffff;
+            --bubble-gray: #f0f0f0;
         }
 
         body {
-            background-color: #000;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* Cabecera con el título de la imagen */
-        .app-header {
-            padding: 30px 10px;
+        /* Cabecera */
+        .header {
+            background: var(--bg-white);
+            padding: 15px;
             text-align: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .app-header h1 {
+        .header h1 {
             margin: 0;
-            font-size: 45px;
-            font-style: italic;
+            font-size: 24px;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 900;
+            font-weight: 800;
         }
 
-        /* Contenedor de Chat */
-        #chat-container {
+        /* Área de Chat con Fondo Blanco */
+        #chat-display {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            background-color: var(--bg-dark);
-            border-top: 1px solid #333;
+            gap: 12px;
+            background-color: var(--bg-white); /* Fondo Blanco solicitado */
         }
 
-        /* Burbujas de Diseño */
-        .message {
+        /* Estilo de Mensajes */
+        .msg {
             max-width: 75%;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 15px;
+            font-size: 14.5px;
             line-height: 1.4;
             position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* Lado Izquierdo (Primer Usuario detectado) */
+        /* Usuario 1 (Izquierda) */
         .left {
             align-self: flex-start;
-            background: var(--bubble-left);
-            border-radius: 20px 20px 20px 5px;
-            border: 1px solid #444;
+            background: var(--bubble-gray);
+            color: #1a1a1a;
+            border-radius: 18px 18px 18px 4px;
         }
 
-        /* Lado Derecho (Segundo Usuario) */
+        /* Usuario 2 (Derecha) */
         .right {
             align-self: flex-end;
             background: var(--gradient);
-            border-radius: 20px 20px 5px 20px;
-        }
-
-        .user-name {
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            opacity: 0.6;
-            display: block;
-        }
-
-        /* Botón Flotante / Inferior */
-        .footer {
-            padding: 25px;
-            background: var(--bg-dark);
-            text-align: center;
-            border-top: 1px solid #333;
-        }
-
-        .btn-upload {
-            background: var(--gradient);
-            border: none;
-            padding: 15px 50px;
-            border-radius: 35px;
             color: white;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 5px 20px rgba(188, 24, 136, 0.5);
+            border-radius: 18px 18px 4px 18px;
         }
 
-        #status-text { color: #666; font-size: 12px; margin-top: 10px; }
+        .user-tag {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            display: block;
+            opacity: 0.6;
+        }
+
+        /* Barra de carga inferior */
+        .footer {
+            padding: 15px;
+            background: var(--bg-white);
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .btn-main {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(233, 89, 80, 0.3);
+        }
+
+        #info { font-size: 11px; color: #999; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
+    <div class="header">
         <h1>ReChat AI</h1>
     </div>
 
-    <div id="chat-container">
-        <p style="text-align: center; color: #444; margin-top: 50px;">
-            Listo para recibir archivo...
-        </p>
+    <div id="chat-display">
+        <p style="text-align: center; color: #bbb; margin-top: 50px;">El chat aparecerá aquí al cargar el archivo.</p>
     </div>
 
     <div class="footer">
-        <input type="file" id="fileIn" style="display:none">
-        <button class="btn-upload" onclick="document.getElementById('fileIn').click()">CARGAR CHAT</button>
-        <div id="status-text">Compatible con cualquier archivo JSON</div>
+        <input type="file" id="jsonInput" style="display:none">
+        <button class="btn-main" onclick="document.getElementById('jsonInput').click()">CARGAR CHAT</button>
+        <div id="info">Compatible con cualquier formato JSON</div>
     </div>
 
 <script>
-    document.getElementById('fileIn').onchange = function(e) {
+    document.getElementById('jsonInput').onchange = function(e) {
         const reader = new FileReader();
-        const container = document.getElementById('chat-container');
-        const status = document.getElementById('status-text');
+        const display = document.getElementById('chat-display');
         
-        status.innerText = "Procesando archivo pesado...";
-        
+        display.innerHTML = "<h3 style='text-align:center; color:#999'>Procesando mensajes...</h3>";
+
         reader.onload = function(ev) {
             try {
                 const data = JSON.parse(ev.target.result);
-                // Busca los mensajes sin importar el nombre de la carpeta
                 const msgs = data.messages || (Array.isArray(data) ? data : []);
                 
-                if (msgs.length === 0) throw "No se encontraron mensajes";
+                if (msgs.length === 0) throw "Vacío";
 
-                container.innerHTML = "";
-                
-                // Detecta automáticamente quién es el primer usuario para ponerlo a la izquierda
-                const primerUsuario = msgs[0].sender_name;
+                display.innerHTML = "";
+                const primerNombre = msgs[0].sender_name;
 
-                // Solo carga los últimos 200 para que la App no se cuelgue
-                msgs.slice(-200).forEach(m => {
-                    const esLadoA = (m.sender_name === primerUsuario);
+                // Cargamos los últimos 300 para asegurar fluidez
+                msgs.slice(-300).forEach(m => {
+                    const esIzquierda = (m.sender_name === primerNombre);
                     const div = document.createElement('div');
-                    div.className = message ${esLadoA ? 'left' : 'right'};
+                    div.className = msg ${esIzquierda ? 'left' : 'right'};
                     div.innerHTML = `
-                        <span class="user-name">${m.sender_name}</span>
+                        <span class="user-tag">${m.sender_name}</span>
                         <div>${m.content || "[Multimedia]"}</div>
                     `;
-                    container.appendChild(div);
+                    display.appendChild(div);
                 });
                 
-                container.scrollTop = container.scrollHeight;
-                status.innerText = "Chat cargado con éxito.";
+                display.scrollTop = display.scrollHeight;
                 
             } catch(err) {
-                status.innerText = "Error: El archivo no es un JSON válido.";
-                container.innerHTML = <pre style="color:#0f0; padding:20px;">${ev.target.result.substring(0, 5000)}</pre>;
+                display.innerHTML = "<p style='color:red; text-align:center'>Error al leer el archivo. Asegúrate de que sea un JSON válido.</p>";
             }
         };
-        reader
+        reader.readAsText(e.target.files[0]);
+    };
+</script>
+
+</body>
+</html>
