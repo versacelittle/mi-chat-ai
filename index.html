@@ -1,31 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>ReChat AI | Operativo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReChat App | Premium</title>
     <style>
-        body { background: #000; color: #fff; font-family: monospace; padding: 20px; }
-        #consola { background: #000; border: 1px solid #0f0; padding: 15px; height: 80vh; overflow: auto; white-space: pre-wrap; font-size: 12px; color: #0f0; }
-        .btn { background: #bc1888; color: white; padding: 15px; border: none; cursor: pointer; width: 100%; font-weight: bold; }
+        :root {
+            --bg-dark: #0f0f10;
+            --pink-accent: #bc1888;
+            --orange-accent: #e95950;
+            --bubble-left: #262626;
+            --gradient: linear-gradient(45deg, #f09433, #e95950, #bc1888);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Cabecera Estilo App */
+        .app-header {
+            padding: 20px;
+            text-align: center;
+            background: #121212;
+            border-bottom: 1px solid #333;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 28px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-style: italic;
+        }
+
+        /* Contenedor de Chat */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Burbujas de Mensaje */
+        .message {
+            max-width: 75%;
+            padding: 12px 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Lado Izquierdo (Basti) */
+        .left {
+            align-self: flex-start;
+            background: var(--bubble-left);
+            border-radius: 20px 20px 20px 5px;
+            border: 1px solid #3d3d3d;
+        }
+
+        /* Lado Derecho (Versaires) */
+        .right {
+            align-self: flex-end;
+            background: var(--gradient);
+            border-radius: 20px 20px 5px 20px;
+            color: white;
+        }
+
+        .sender-name {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            opacity: 0.7;
+            display: block;
+        }
+
+        /* Área de Botón Inferior */
+        .footer {
+            padding: 30px;
+            background: #121212;
+            border-top: 1px solid #333;
+            text-align: center;
+        }
+
+        .btn-upload {
+            background: var(--gradient);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(188, 24, 136, 0.4);
+            transition: 0.2s;
+        }
+
+        .btn-upload:active { transform: scale(0.95); }
+
+        #status-text { margin-top: 10px; font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
-    <h2>MODO LECTURA DIRECTA</h2>
-    <input type="file" id="f" style="display:none">
-    <button class="btn" onclick="document.getElementById('f').click()">FORZAR APERTURA DE ARCHIVO</button>
-    <div id="consola" style="margin-top:20px;">Esperando archivo...</div>
 
-    <script>
-        document.getElementById('f').onchange = function(e) {
-            const reader = new FileReader();
-            const consola = document.getElementById('consola');
-            consola.innerText = "Procesando...";
-            
-            reader.onload = function(ev) {
-                consola.innerText = ev.target.result;
-            };
-            
-            reader.readAsText(e.target.files[0]);
-        };
-    </script>
-</body>
-</html>
+    <div class="app-header">
+        <h1>ReChat AI</h1>
+    </div>
+
+    <div id="chat-container">
+        <p style="text-align: center; color: #666; margin-top: 100px;">
+            Presiona el botón para cargar tus mensajes.
+        </p>
+    </div>
+
+    <div class="footer">
+        <div id="status-text">Listo para recibir archivo</div>
+        <input type="file" id="fileInput" style="display:none">
+        <button class="btn-upload" onclick="document.getElementById('fileInput').click()">CARGAR CHAT</button>
+    </div>
+
+<script>
+    document.getElementById('fileInput').onchange = function(e) {
+        const reader = new FileReader();
+        const container = document.getElementById('chat-container');
+        const status = document.getElementById('status-text');
+        
+        status.innerText = "Procesando archivo pesado...";
+        
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                const msgs = data.messages || data;
+                container.innerHTML = ""; // Limpiar pantalla
+                
+                // Procesamos solo los últimos 300 para que Opera GX no se trabe
+                msgs.slice(-300).forEach(m => {
+                    const isMe = m.sender_name.toLowerCase().includes('versaires');
+                    const sideClass = isMe ? 'right' : 'left';
+                    
+                    const div = document.createElement('div');
+                    div.
+
