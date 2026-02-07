@@ -2,172 +2,66 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReChat Premium AI</title>
+    <title>ReChat App | Control Total</title>
     <style>
-        :root {
-            --accent: #bc1888;
-            --gradient: linear-gradient(45deg, #f09433, #e95950, #bc1888);
-            --bg: #0a0a0b;
-        }
-
-        body {
-            background: var(--bg);
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Cabecera Estilo Glassmorphism */
-        .header {
-            background: rgba(18, 18, 18, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #222;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 22px;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* Área de Mensajes */
-        #chat-view {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a1c 0%, #0a0a0b 100%);
-        }
-
-        .bubble {
-            max-width: 70%;
-            padding: 12px 16px;
-            font-size: 14.5px;
-            line-height: 1.5;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Basti - Izquierda */
-        .basti {
-            align-self: flex-start;
-            background: #222;
-            border-radius: 18px 18px 18px 4px;
-            border-left: 3px solid var(--accent);
-        }
-
-        /* Versaires - Derecha */
-        .versaires {
-            align-self: flex-end;
-            background: var(--gradient);
-            color: white;
-            border-radius: 18px 18px 4px 18px;
-        }
-
-        .name {
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 4px;
-            display: block;
-            opacity: 0.8;
-        }
-
-        /* Barra Inferior */
-        .control-bar {
-            padding: 20px;
-            background: #121212;
-            text-align: center;
-            border-top: 1px solid #222;
-        }
-
-        .btn-glow {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(188, 24, 136, 0.4);
-            transition: 0.3s;
-        }
-
-        .btn-glow:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(188, 24, 136, 0.6);
-        }
-
-        /* Scrollbar personalizada */
-        #chat-view::-webkit-scrollbar { width: 6px; }
-        #chat-view::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #121212; padding: 15px; text-align: center; border-bottom: 2px solid #bc1888; color: #bc1888; font-size: 20px; font-weight: bold; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #080808; }
+        /* Burbujas Simples para que NO se trabe */
+        .msg { max-width: 80%; padding: 10px; border-radius: 12px; font-size: 14px; line-height: 1.4; }
+        .basti { background: #222; align-self: flex-start; border-left: 4px solid #444; }
+        .versaires { background: #bc1888; align-self: flex-end; color: #fff; }
+        .footer { padding: 15px; background: #121212; border-top: 1px solid #333; text-align: center; }
+        .btn { background: #bc1888; color: white; border: none; padding: 12px 25px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        #status { font-size: 11px; color: #666; margin-top: 5px; }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <h1>ReChat AI</h1>
-    <span id="counter" style="font-size: 12px; color: #666;">Sin mensajes</span>
-</div>
-
-<div id="chat-view">
-    <div style="text-align:center; margin-top:20vh;">
-        <p style="color:#555">App lista. Carga tu JSON para visualizar.</p>
+    <div class="header">ReChat AI - Modo App</div>
+    <div id="chat-box"><p style="text-align:center;color:#444;margin-top:50px;">Esperando archivo...</p></div>
+    <div class="footer">
+        <div id="status">Listo</div>
+        <input type="file" id="f" style="display:none">
+        <button class="btn" onclick="document.getElementById('f').click()">SELECCIONAR CHAT</button>
     </div>
-</div>
-
-<div class="control-bar">
-    <input type="file" id="loader" style="display:none">
-    <button class="btn-glow" onclick="document.getElementById('loader').click()">SUBIR ARCHIVO JSON</button>
-</div>
 
 <script>
-    document.getElementById('loader').onchange = function(e) {
-        const file = e.target.files[0];
+    document.getElementById('f').onchange = function(e) {
         const reader = new FileReader();
-        const view = document.getElementById('chat-view');
+        const box = document.getElementById('chat-box');
+        const status = document.getElementById('status');
         
+        status.innerText = "Leyendo archivo pesado... espera...";
+        box.innerHTML = "<h3 style='text-align:center;color:#bc1888'>PROCESANDO...</h3>";
+
         reader.onload = function(ev) {
             try {
                 const data = JSON.parse(ev.target.result);
                 const msgs = data.messages || data;
-                view.innerHTML = "";
+                let html = "";
                 
-                document.getElementById('counter').innerText = msgs.length + " mensajes";
+                // Solo cargamos los últimos 150 mensajes para que la App sea instantánea
+                const ultimos = msgs.slice(-150);
                 
-                // Cargamos un bloque grande de mensajes
-                msgs.slice(-500).forEach(m => {
-                    const isMe = m.sender_name.toLowerCase().includes('versaires');
-                    const div = document.createElement('div');
-                    div.className = bubble ${isMe ? 'versaires' : 'basti'};
-                    div.innerHTML = <span class="name">${m.sender_name}</span><div>${m.content || "[Multimedia]"}</div>;
-                    view.appendChild(div);
+                ultimos.forEach(m => {
+                    const esVersaires = m.sender_name.toLowerCase().includes('versaires');
+                    html += `<div class="msg ${esVersaires ? 'versaires' : 'basti'}">
+                                <strong>${m.sender_name}:</strong><br>
+                                ${m.content || "[Archivo]"}
+                             </div>`;
                 });
                 
-                view.scrollTop = view.scrollHeight;
+                box.innerHTML = html;
+                box.scrollTop = box.scrollHeight;
+                status.innerText = "Cargados últimos 150 de " + msgs.length + " mensajes.";
             } catch(err) {
-                view.innerHTML = "<div style='color:red; padding:20px;'>Error: El archivo JSON tiene un formato inválido.</div>";
+                // Si falla el diseño, muestra el texto crudo para que no te quedes sin nada
+                status.innerText = "Error de formato. Mostrando texto crudo.";
+                box.innerHTML = <pre style="color:#0f0;font-size:11px;">${ev.target.result.substring(0, 10000)}</pre>;
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(e.target.files[0]);
     };
 </script>
-
 </body>
 </html>
-
-
