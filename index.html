@@ -2,75 +2,82 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat Pro | Analyzer</title>
+    <title>ReChat Pro AI Analyzer</title>
     <style>
         :root { --accent: #bc1888; --bg-chat: #ffffff; }
-        body { background: #f0f2f5; color: #1c1e21; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { background: #f0f2f5; color: #1c1e21; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Cabecera y Herramientas */
-        .header { background: #fff; padding: 10px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 20px; background: linear-gradient(45deg, #f09433, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* Header Premium */
+        .header { background: #fff; padding: 10px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .header h1 { margin: 0; font-size: 20px; background: linear-gradient(45deg, #f09433, #e95950, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
         
-        .toolbar { background: #f8f9fa; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid #ddd; }
-        .tool-btn { background: #fff; border: 1px solid #ddd; padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-        .tool-btn:hover { background: #eee; }
+        /* Barra de Herramientas */
+        .toolbar { background: #fff; padding: 8px 15px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid #eee; scrollbar-width: none; }
+        .tool-btn { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; color: #444; }
+        .tool-btn:hover { background: #e4e6eb; color: #000; }
+        .tool-btn.ai { background: linear-gradient(45deg, #f09433, #bc1888); color: white; }
 
-        /* Área de Chat */
-        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-chat); transition: 0.3s; }
-        .bubble { max-width: 75%; padding: 10px; border-radius: 15px; font-size: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .left { background: #e4e6eb; align-self: flex-start; }
-        .right { background: #bc1888; color: white; align-self: flex-end; }
-        .user { font-size: 9px; font-weight: bold; opacity: 0.7; display: block; }
+        /* Chat con fondo personalizable */
+        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-chat); transition: background 0.5s ease; }
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 14.5px; position: relative; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .left { background: #e4e6eb; align-self: flex-start; border-bottom-left-radius: 4px; color: #050505; }
+        .right { background: linear-gradient(45deg, #f09433, #e95950, #bc1888); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .user { font-size: 10px; font-weight: 700; margin-bottom: 4px; display: block; opacity: 0.8; }
 
         /* Footer */
         .footer { padding: 15px; background: #fff; border-top: 1px solid #ddd; text-align: center; }
-        .btn-main { background: #bc1888; color: white; border: none; padding: 10px 30px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .btn-main { background: #1c1e21; color: white; border: none; padding: 12px 40px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 15px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>ReChat Pro</h1>
-    <div id="stats-summary" style="font-size: 11px; color: #666;">Carga un chat para ver stats</div>
+    <h1>ReChat Pro AI</h1>
+    <div id="quick-stats" style="font-size: 11px; font-weight: 600; color: #888;">ESPERANDO CHAT...</div>
 </div>
 
 <div class="toolbar" id="tools" style="display:none">
-    <button class="tool-btn" onclick="analizarIA()">✨ Analizar con IA</button>
-    <button class="tool-btn" onclick="cambiarFondo()">🎨 Cambiar Fondo</button>
-    <button class="tool-btn" onclick="descargarChat()">💾 Descargar Resumen</button>
-    <button class="tool-btn" onclick="verStats()">📊 Estadísticas Detalladas</button>
+    <button class="tool-btn ai" onclick="analizarSentimientos()">🧠 Escaneo IA de Relación</button>
+    <button class="tool-btn" onclick="cambiarFondo()">🖼️ Cambiar Fondo</button>
+    <button class="tool-btn" onclick="descargarImportantes()">💾 Guardar Destacados</button>
+    <button class="tool-btn" onclick="verRanking()">🏆 Ranking de Mensajes</button>
 </div>
 
 <div id="chat-box">
-    <p style="text-align:center; color:#999; margin-top:100px;">Sube tu JSON para activar las funciones pro.</p>
+    <div style="text-align:center; color:#999; margin-top:15vh;">
+        <p>Sube tu archivo JSON para activar el panel de Inteligencia Artificial.</p>
+    </div>
 </div>
 
 <div class="footer">
-    <input type="file" id="f" style="display:none">
-    <button class="btn-main" onclick="document.getElementById('f').click()">CARGAR CHAT</button>
+    <input type="file" id="f" style="display:none" accept=".json">
+    <button class="btn-main" onclick="document.getElementById('f').click()">ABRIR CHAT JSON</button>
 </div>
 
 <script>
-    let mensajesCargados = [];
+    let mensajesGlobales = [];
 
     document.getElementById('f').onchange = function(e) {
         const reader = new FileReader();
         reader.onload = function(ev) {
             try {
                 const data = JSON.parse(ev.target.result);
-                mensajesCargados = data.messages || (Array.isArray(data) ? data : []);
+                mensajesGlobales = data.messages || (Array.isArray(data) ? data : []);
                 document.getElementById('tools').style.display = 'flex';
-                renderChat();
-                actualizarStatsRapidas();
-            } catch(err) { alert("Error al leer JSON"); }
+                document.getElementById('quick-stats').innerText = mensajesGlobales.length + " MENSAJES";
+                renderizarChat();
+            } catch(err) { alert("Error: El archivo no es un JSON válido."); }
         };
         reader.readAsText(e.target.files[0]);
     };
 
-    function renderChat() {
+    function renderizarChat() {
         const box = document.getElementById('chat-box');
-        const primerNombre = mensajesCargados[0].sender_name;
-        box.innerHTML = mensajesCargados.slice(-300).map(m => `
+        if (mensajesGlobales.length === 0) return;
+        const primerNombre = mensajesGlobales[0].sender_name;
+        box.innerHTML = mensajesGlobales.slice(-400).map(m => `
             <div class="bubble ${m.sender_name === primerNombre ? 'left' : 'right'}">
                 <span class="user">${m.sender_name}</span>
                 ${m.content || "[Multimedia]"}
@@ -79,38 +86,53 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    function actualizarStatsRapidas() {
-        document.getElementById('stats-summary').innerText = Total: ${mensajesCargados.length} mensajes analizados;
-    }
-
     function cambiarFondo() {
-        const color = prompt("Escribe un color (ej: #ffebee, lightblue, white, #e3f2fd):", "#ffffff");
-        if(color) document.documentElement.style.setProperty('--bg-chat', color);
+        const bg = prompt("Elige un fondo:\n1. Escribe un color (ej: 'pink' o '#e3f2fd')\n2. Pega el link de una imagen:");
+        if (bg) {
+            if (bg.startsWith('http')) document.documentElement.style.setProperty('--bg-chat', url('${bg}') center/cover);
+            else document.documentElement.style.setProperty('--bg-chat', bg);
+        }
     }
 
-    function verStats() {
-        const conteo = {};
-        mensajesCargados.forEach(m => conteo[m.sender_name] = (conteo[m.sender_name] || 0) + 1);
-        let msg = "📊 ESTADÍSTICAS:\n";
-        for(let user in conteo) msg += ${user}: ${conteo[user]} mensajes\n;
-        alert(msg);
+    function analizarSentimientos() {
+        const textoTotal = mensajesGlobales.slice(-500).map(m => (m.content || "").toLowerCase()).join(" ");
+        
+        // Diccionarios simples
+        const amor = (textoTotal.match(/te amo|te quiero|linda|hermosa|bebé|amor|gracias|corazón/g) || []).length;
+        const tension = (textoTotal.match(/no|mal|odio|pelea|porque|siempre|nunca|terminar/g) || []).length;
+        
+        let resultado = "";
+        let puntaje = 0;
+
+        if (amor > tension) {
+            puntaje = 100 - (tension * 2);
+            resultado = "❤️ RELACIÓN SANA: Hay mucho afecto detectado. El lenguaje es positivo.";
+        } else {
+            puntaje = 50 - (tension);
+            resultado = "⚠️ TENSIÓN DETECTADA: Se detectan palabras de conflicto o discusiones recientes.";
+        }
+
+        alert(🤖 ANÁLISIS DE LA IA:\n\n${resultado}\n\nPuntaje de afinidad: ${puntaje}/100\n\n(Basado en los últimos 500 mensajes));
     }
 
-    function descargarChat() {
-        const texto = mensajesCargados.slice(-100).map(m => ${m.sender_name}: ${m.content}).join('\n');
-        const blob = new Blob([texto], {type: 'text/plain'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'resumen_rechat.txt';
-        a.click();
+    function verRanking() {
+        const ranking = {};
+        mensajesGlobales.forEach(m => ranking[m.sender_name] = (ranking[m.sender_name] || 0) + 1);
+        let texto = "🏆 RANKING DE PARTICIPACIÓN:\n\n";
+        Object.entries(ranking).sort((a,b) => b[1] - a[1]).forEach(([nom, num]) => {
+            texto += 👤 ${nom}: ${num} mensajes\n;
+        });
+        alert(texto);
     }
 
-    function analizarIA() {
-        const total = mensajesCargados.length;
-        const ultimoMsg = mensajesCargados[mensajesCargados.length-1].content;
-        alert("🤖 IA ANALIZANDO...\n\nHe analizado " + total + " mensajes. El sentimiento parece positivo. El último tema fue: '" + ultimoMsg + "'. \n\nConsejo: Mantén la conversación fluida.");
+    function descargarImportantes() {
+        const destacados = mensajesGlobales.slice(-200).map(m => [${m.sender_name}]: ${m.content}).join("\n");
+        const blob = new Blob([destacados], {type: 'text/plain'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'destacados_rechat.txt';
+        link.click();
     }
 </script>
 </body>
 </html>
-
