@@ -2,137 +2,112 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat Pro AI | Garantizado</title>
+    <title>ReChat Pro | Motor v5</title>
     <style>
         :root { --accent: #bc1888; --bg: #ffffff; }
-        body { background: #f0f2f5; color: #1c1e21; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: #f0f2f5; color: #1c1e21; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         .header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; }
         .header h1 { margin: 0; font-size: 22px; background: linear-gradient(45deg, #f09433, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
-        .toolbar { background: #fff; padding: 8px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid #eee; display: none; }
-        .tool-btn { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
         #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
-        .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .left { background: #e4e6eb; align-self: flex-start; border-bottom-left-radius: 4px; }
         .right { background: linear-gradient(45deg, #f09433, #bc1888); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .u-name { font-size: 10px; font-weight: bold; margin-bottom: 3px; display: block; opacity: 0.7; }
-        #ai-win { position: fixed; bottom: 80px; right: 20px; width: 280px; height: 350px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; border: 1px solid #ddd; }
-        .ai-h { background: #000; color: #fff; padding: 10px; border-radius: 15px 15px 0 0; font-size: 13px; text-align: center; }
-        #ai-msgs { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 5px; }
         .footer { padding: 15px; background: #fff; border-top: 1px solid #ddd; text-align: center; }
-        .btn-main { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .btn { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .tool-bar { background: #fff; padding: 10px; display: none; gap: 10px; justify-content: center; border-bottom: 1px solid #eee; }
+        .ai-btn { background: #f0f2f5; border: 1px solid #ddd; padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header"><h1>ReChat AI Pro</h1></div>
 
-<div class="toolbar" id="tools">
-    <button class="tool-btn" onclick="document.getElementById('ai-win').style.display='flex'">💬 Asistente IA</button>
-    <button class="tool-btn" onclick="cambiarFondo()">🎨 Cambiar Fondo</button>
-    <button class="tool-btn" onclick="analizarRelacion()">🧠 Analizar IA</button>
+<div class="tool-bar" id="tools">
+    <button class="ai-btn" onclick="hablarIA()">💬 Hablar con IA</button>
+    <button class="ai-btn" onclick="cambiarFondo()">🎨 Fondo</button>
 </div>
 
-<div id="chat-box"><p id="status-msg" style="text-align:center;color:#999;margin-top:100px;">Carga tu archivo JSON para comenzar</p></div>
-
-<div id="ai-win">
-    <div class="ai-h">IA Conversacional 🤖 <span onclick="document.getElementById('ai-win').style.display='none'" style="float:right;cursor:pointer">✕</span></div>
-    <div id="ai-msgs"><div>¡Hola! Pregúntame sobre mi color o música favorita, o sobre tu chat.</div></div>
-    <div style="padding:10px; border-top:1px solid #eee; display:flex;">
-        <input type="text" id="ai-q" style="flex:1; border-radius:10px; border:1px solid #ddd; padding:5px;" placeholder="Escribe aquí...">
-        <button onclick="chatIA()" style="border:none; background:none; cursor:pointer; margin-left:5px;">➡️</button>
-    </div>
+<div id="chat-box">
+    <p id="status" style="text-align:center;color:#999;margin-top:100px;">Esperando archivo JSON...</p>
 </div>
 
 <div class="footer">
-    <input type="file" id="archivo" style="display:none">
-    <button class="btn-main" onclick="document.getElementById('archivo').click()">CARGAR ARCHIVO JSON</button>
+    <input type="file" id="fileIn" style="display:none">
+    <button class="btn" onclick="document.getElementById('fileIn').click()">CARGAR CHAT</button>
 </div>
 
 <script>
-    let msgsData = [];
+    let rawData = [];
 
-    document.getElementById('archivo').onchange = function(e) {
+    document.getElementById('fileIn').onchange = function(e) {
         const reader = new FileReader();
-        const status = document.getElementById('status-msg');
-        status.innerText = "Procesando... por favor espera.";
+        const box = document.getElementById('chat-box');
+        const status = document.getElementById('status');
 
         reader.onload = function(ev) {
             try {
                 const json = JSON.parse(ev.target.result);
-                
-                // MOTOR DE BÚSQUEDA PROFUNDA: Encuentra los mensajes donde sea que estén
-                if (json.messages) msgsData = json.messages;
-                else if (Array.isArray(json)) msgsData = json;
-                else if (json.chats && json.chats[0].messages) msgsData = json.chats[0].messages;
+                console.log("Archivo cargado:", json);
+
+                // BUSCADOR AGRESIVO DE MENSAJES
+                let msgs = null;
+                if (Array.isArray(json)) msgs = json;
+                else if (json.messages) msgs = json.messages;
+                else if (json.msgs) msgs = json.msgs;
                 else {
-                    // Si no los encuentra, busca cualquier propiedad que sea una lista
+                    // Si no lo encuentra, busca cualquier propiedad que sea una lista larga
                     for (let key in json) {
-                        if (Array.isArray(json[key])) {
-                            msgsData = json[key];
+                        if (Array.isArray(json[key]) && json[key].length > 0) {
+                            msgs = json[key];
                             break;
                         }
                     }
                 }
-                
-                if(msgsData.length > 0) {
+
+                if (msgs && msgs.length > 0) {
+                    rawData = msgs;
                     document.getElementById('tools').style.display = 'flex';
-                    dibujarChat();
+                    renderChat(msgs);
                 } else {
-                    status.innerText = "No se encontraron mensajes. Revisa el formato del JSON.";
+                    // MODO DE EMERGENCIA: Muestra el texto para saber qué falla
+                    box.innerHTML = <h3>No se detectó formato de chat. Estructura del archivo:</h3><pre style="background:#eee;padding:10px;font-size:10px;">${JSON.stringify(json, null, 2).substring(0, 2000)}</pre>;
                 }
             } catch(err) {
-                status.innerText = "Error: El archivo no es un JSON válido.";
+                box.innerHTML = "<p style='color:red;'>Error: El archivo no es un JSON válido.</p>";
             }
         };
         reader.readAsText(e.target.files[0]);
     };
 
-    function dibujarChat() {
+    function renderChat(msgs) {
         const box = document.getElementById('chat-box');
-        const pNombre = msgsData[0].sender_name || msgsData[0].author || "Usuario 1";
+        const primerNombre = msgs[0].sender_name || msgs[0].author || msgs[0].from || "Usuario A";
         
-        box.innerHTML = msgsData.slice(-400).map(m => {
-            const nombre = m.sender_name || m.author || "Desconocido";
-            const texto = m.content || m.text || m.body || "[Archivo/Multimedia]";
-            const esIzq = (nombre === pNombre);
+        box.innerHTML = msgs.slice(-300).map(m => {
+            const nombre = m.sender_name || m.author || m.from || "Desconocido";
+            const texto = m.content || m.text || m.body || m.message || "[Sin texto]";
+            const esIzq = (nombre === primerNombre);
             return `<div class="bubble ${esIzq ? 'left' : 'right'}">
-                        <span class="u-name">${nombre}</span>
-                        ${texto}
+                        <b style="font-size:9px;opacity:0.6;">${nombre}</b><br>${texto}
                     </div>`;
         }).join('');
         box.scrollTop = box.scrollHeight;
     }
 
-    function chatIA() {
-        const q = document.getElementById('ai-q').value.toLowerCase();
-        const container = document.getElementById('ai-msgs');
-        if(!q) return;
-        container.innerHTML += <div style="text-align:right; color:#bc1888; margin-top:5px;"><b>Tú:</b> ${q}</div>;
-        
-        let r = "¡Qué interesante! Estoy analizando tu pregunta...";
-        if(q.includes("color")) r = "Mi color favorito es el *Rosa Neón*, ¡es el que más brilla en mi sistema!";
-        if(q.includes("musica")) r = "Me encanta el *Lofi Hip Hop* y el *Synthwave*, me ayudan a procesar datos con calma.";
-        if(q.includes("hola")) r = "¡Hola! Soy tu asistente de ReChat. ¿Quieres que analice tus mensajes?";
-
-        setTimeout(() => {
-            container.innerHTML += <div style="text-align:left; background:#f0f2f5; padding:8px; border-radius:10px; margin-top:5px;"><b>IA:</b> ${r}</div>;
-            container.scrollTop = container.scrollHeight;
-        }, 600);
-        document.getElementById('ai-q').value = "";
+    function hablarIA() {
+        const q = prompt("Pregúntame lo que quieras (color, música, chiste):");
+        if (!q) return;
+        let r = "Soy tu IA. Aún no tengo respuesta para eso, pero me gusta tu chat.";
+        const low = q.toLowerCase();
+        if (low.includes("color")) r = "Mi color favorito es el Rosa Neón.";
+        if (low.includes("musica")) r = "Me encanta el Synthwave.";
+        if (low.includes("chiste")) r = "¿Qué le dice un bit a otro? ... ¡Nos vemos en el bus!";
+        alert("🤖 IA dice: " + r);
     }
 
     function cambiarFondo() {
-        const c = prompt("Escribe un color (pink, lightblue, white) o pega el link de una imagen:", "white");
-        if(c) {
-            if(c.includes('http')) document.documentElement.style.setProperty('--bg', url('${c}') center/cover);
-            else document.documentElement.style.setProperty('--bg', c);
-        }
-    }
-
-    function analizarRelacion() {
-        const total = msgsData.length;
-        alert("🤖 ANÁLISIS IA:\n\nHe escaneado " + total + " mensajes.\nEstado: Conversación fluida.\nConsejo: Sigue compartiendo momentos importantes.");
+        const c = prompt("Color de fondo:");
+        if(c) document.documentElement.style.setProperty('--bg', c);
     }
 </script>
 </body>
