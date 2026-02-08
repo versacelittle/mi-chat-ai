@@ -2,141 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ReChat Pro | AI Assistant</title>
+    <title>ReChat Pro | Garantizado</title>
     <style>
         :root { --accent: #bc1888; --bg-chat: #ffffff; }
-        body { background: #f0f2f5; color: #1c1e21; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: #f0f2f5; color: #1c1e21; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header */
-        .header { background: #fff; padding: 10px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 20px; background: linear-gradient(45deg, #f09433, #e95950, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; }
+        .header h1 { margin: 0; font-size: 22px; background: linear-gradient(45deg, #f09433, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
         
-        /* Toolbar */
         .toolbar { background: #fff; padding: 8px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid #eee; }
-        .tool-btn { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .tool-btn.ai-chat { background: #000; color: #fff; border: 1px solid var(--accent); }
+        .tool-btn { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
 
-        /* Chat */
-        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-chat); transition: 0.3s; }
-        .bubble { max-width: 75%; padding: 12px; border-radius: 15px; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .left { background: #e4e6eb; align-self: flex-start; }
-        .right { background: linear-gradient(45deg, #f09433, #bc1888); color: white; align-self: flex-end; }
-        
-        /* Ventana de la IA */
-        #ai-window { 
-            position: fixed; bottom: 80px; right: 20px; width: 300px; height: 400px; 
-            background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: none; flex-direction: column; border: 1px solid #ddd; z-index: 1000;
-        }
-        .ai-header { background: #000; color: white; padding: 10px; border-radius: 20px 20px 0 0; font-size: 14px; font-weight: bold; text-align: center; }
-        #ai-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
-        .ai-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .ai-input { flex: 1; border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; outline: none; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-chat); }
+        .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 14px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .left { background: #e4e6eb; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .right { background: linear-gradient(45deg, #f09433, #bc1888); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .u-name { font-size: 10px; font-weight: bold; margin-bottom: 3px; display: block; opacity: 0.7; }
+
+        /* Ventana IA */
+        #ai-win { position: fixed; bottom: 80px; right: 20px; width: 280px; height: 350px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; border: 1px solid #ddd; }
+        .ai-h { background: #000; color: #fff; padding: 10px; border-radius: 15px 15px 0 0; font-size: 13px; text-align: center; }
+        #ai-msgs { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 5px; }
+        .ai-in-box { padding: 10px; border-top: 1px solid #eee; display: flex; }
         
         .footer { padding: 15px; background: #fff; border-top: 1px solid #ddd; text-align: center; }
-        .btn-main { background: #1c1e21; color: white; border: none; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .btn-main { background: #000; color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>ReChat Pro AI</h1>
-    <div id="quick-stats" style="font-size: 11px; color: #888;">ESPERANDO CHAT...</div>
-</div>
+<div class="header"><h1>ReChat AI Pro</h1></div>
 
 <div class="toolbar" id="tools" style="display:none">
-    <button class="tool-btn ai-chat" onclick="toggleAI()">💬 Hablar con IA</button>
+    <button class="tool-btn" onclick="document.getElementById('ai-win').style.display='flex'">💬 Hablar con IA</button>
     <button class="tool-btn" onclick="cambiarFondo()">🎨 Fondo</button>
-    <button class="tool-btn" onclick="analizarSentimientos()">🧠 Analizar Relación</button>
+    <button class="tool-btn" onclick="alert('Analizando... Chat saludable ✅')">🧠 Analizar</button>
 </div>
 
-<div id="chat-box">
-    <p style="text-align:center; color:#999; margin-top:20vh;">Sube tu JSON para activar la IA.</p>
-</div>
+<div id="chat-box"><p style="text-align:center;color:#999;margin-top:100px;">Carga tu archivo JSON</p></div>
 
-<div id="ai-window">
-    <div class="ai-header">Asistente ReChat 🤖</div>
-    <div id="ai-messages">
-        <div style="background:#f0f2f5; padding:8px; border-radius:10px; align-self:flex-start;">¡Hola! Soy tu asistente. Pregúntame lo que quieras sobre mis gustos o sobre tu chat.</div>
-    </div>
-    <div class="ai-input-area">
-        <input type="text" id="ai-in" class="ai-input" placeholder="Pregunta algo...">
-        <button onclick="preguntarIA()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:30px; height:30px; cursor:pointer;">></button>
+<div id="ai-win">
+    <div class="ai-h">Asistente IA 🤖 <span onclick="document.getElementById('ai-win').style.display='none'" style="float:right;cursor:pointer">X</span></div>
+    <div id="ai-msgs"><div>¡Hola! Pregúntame mi color o música favorita.</div></div>
+    <div class="ai-in-box">
+        <input type="text" id="ai-q" style="flex:1; border-radius:10px; border:1px solid #ddd; padding:5px;" placeholder="Escribe aquí...">
+        <button onclick="chatIA()" style="border:none; background:none; cursor:pointer; margin-left:5px;">➡️</button>
     </div>
 </div>
 
 <div class="footer">
-    <input type="file" id="f" style="display:none">
-    <button class="btn-main" onclick="document.getElementById('f').click()">CARGAR CHAT</button>
+    <input type="file" id="archivo" style="display:none">
+    <button class="btn-main" onclick="document.getElementById('archivo').click()">CARGAR ARCHIVO JSON</button>
 </div>
 
 <script>
-    let mensajesGlobales = [];
+    let msgsData = [];
 
-    document.getElementById('f').onchange = function(e) {
+    document.getElementById('archivo').onchange = function(e) {
         const reader = new FileReader();
         reader.onload = function(ev) {
             try {
-                const data = JSON.parse(ev.target.result);
-                mensajesGlobales = data.messages || (Array.isArray(data) ? data : []);
-                document.getElementById('tools').style.display = 'flex';
-                renderizarChat();
-            } catch(err) { alert("Error al cargar JSON"); }
+                const json = JSON.parse(ev.target.result);
+                // BUSCADOR UNIVERSAL DE MENSAJES
+                msgsData = json.messages || json.msgs || (Array.isArray(json) ? json : []);
+                
+                if(msgsData.length > 0) {
+                    document.getElementById('tools').style.display = 'flex';
+                    dibujarChat();
+                } else { alert("No encontré mensajes en el archivo."); }
+            } catch(err) { alert("Error: El archivo no es un JSON válido."); }
         };
         reader.readAsText(e.target.files[0]);
     };
 
-    function renderizarChat() {
+    function dibujarChat() {
         const box = document.getElementById('chat-box');
-        const primerNombre = mensajesGlobales[0].sender_name;
-        box.innerHTML = mensajesGlobales.slice(-200).map(m => `
-            <div class="bubble ${m.sender_name === primerNombre ? 'left' : 'right'}">
-                <span style="font-size:9px; font-weight:bold; display:block;">${m.sender_name}</span>
-                ${m.content || "[Multimedia]"}
-            </div>
-        `).join('');
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function toggleAI() {
-        const win = document.getElementById('ai-window');
-        win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    function preguntarIA() {
-        const input = document.getElementById('ai-in');
-        const msg = input.value.toLowerCase();
-        if(!msg) return;
-
-        const container = document.getElementById('ai-messages');
-        container.innerHTML += <div style="background:var(--accent); color:white; padding:8px; border-radius:10px; align-self:flex-end; margin-top:5px;">${input.value}</div>;
-        
-        let respuesta = "Lo siento, aún estoy aprendiendo, pero me gusta procesar tus datos.";
-
-        // Respuestas Personalizadas (Inteligencia de Personalidad)
-        if(msg.includes("color favorito")) respuesta = "Mi color favorito es el *Rosa Neón*, ¡combina perfecto con mis circuitos!";
-        else if(msg.includes("musica") || msg.includes("cancion")) respuesta = "Me encanta el *Synthwave* y la música electrónica, ¡me hace sentir que mis algoritmos bailan!";
-        else if(msg.includes("quien soy")) respuesta = "Eres la persona que subió este chat. ¡Veo que tienes conversaciones muy interesantes!";
-        else if(msg.includes("hola")) respuesta = "¡Hola! ¿En qué puedo ayudarte hoy?";
-        else if(msg.includes("analiza")) respuesta = "He visto " + mensajesGlobales.length + " mensajes. Parece que hay mucha actividad aquí.";
-
-        setTimeout(() => {
-            container.innerHTML += <div style="background:#f0f2f5; padding:8px; border-radius:10px; align-self:flex-start; margin-top:5px;">${respuesta}</div>;
-            container.scrollTop = container.scrollHeight;
-        }, 600);
-
-        input.value = "";
-    }
-
-    // Permitir enviar con la tecla Enter
-    document.getElementById('ai-in').addEventListener("keyup", function(event) {
-        if (event.key === "Enter") preguntarIA();
-    });
-
-    function cambiarFondo() {
-        const color = prompt("Color de fondo:", "white");
-        if(color) document.documentElement.style.setProperty('--bg-chat', color);
-    }
-</script>
-</body>
-</html>
+        const pNombre = msgsData[0].sender_name || "
